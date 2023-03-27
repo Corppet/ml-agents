@@ -13,9 +13,26 @@ namespace Ball3D
     {
         [HideInInspector] public static QLearningManager Instance { get; private set; }
         [HideInInspector] public Dictionary<(State, Action), float> QValues { get; private set; }
-
-        [HideInInspector] public int Episodes { get; set; }
-        [HideInInspector] public int Steps { get; set; }
+        private int _episodes;
+        [HideInInspector] public int Episodes
+        {
+            get { return _episodes; }
+            set
+            {
+                references.episodesText.text = "Episodes: " + value;
+                _episodes = value;
+            }
+        }
+        private int _steps;
+        [HideInInspector] public int Steps
+        {
+            get { return _steps;  }
+            set
+            {
+                references.stepsText.text = "Steps: " + value;
+                _steps = value;
+            }
+        }
 
         [Header("Hyperparameters")]
         [Tooltip("Learning Rate")]
@@ -31,8 +48,21 @@ namespace Ball3D
         [Space(10)]
 
         [Header("References")]
-        [SerializeField] private string outputFilePath;
+        [SerializeField] private string outputDirectory = "/Data/";
+        [SerializeField] private string outputFileName = "3DBall-QLearning";
         [SerializeField] private References references;
+
+        private StreamWriter outputStream;
+
+        public void CompleteEpisode(float totalReward)
+        {
+            if (Application.isEditor)
+            {
+                outputStream.WriteLine(Episodes + "," + totalReward);
+                outputStream.Flush();
+            }
+            Episodes++;
+        }
 
         public void UpdateAlpha()
         {
@@ -50,6 +80,12 @@ namespace Ball3D
         {
             epsilon = references.epsilonSlider.value;
             references.epsilonText.text = epsilon.ToString("F2");
+        }
+
+        public void UpdateTimeScale()
+        {
+            Time.timeScale = references.timeScaleSlider.value;
+            references.timeScaleText.text = Time.timeScale.ToString("F2");
         }
 
         public void UpdateQValue(State state, Action action, float reward, State nextState)
@@ -125,6 +161,8 @@ namespace Ball3D
 
             // Initialize variables
             QValues = new();
+            Episodes = 0;
+            Steps = 0;
         }
 
         private void Start()
@@ -136,6 +174,44 @@ namespace Ball3D
             references.gammaSlider.value = gamma;
             references.epsilonText.text = epsilon.ToString("F2");
             references.epsilonSlider.value = epsilon;
+            references.timeScaleText.text = Time.timeScale.ToString("F2");
+            references.timeScaleSlider.value = Time.timeScale;
+
+            SetupOutputFile();
+        }
+
+        private void Update()
+        {
+            if (!Application.isPlaying && Application.isEditor)
+            {
+                // close file
+                if (outputStream != null)
+                {
+                    outputStream.Close();
+                    outputStream = null;
+                }
+            }
+        }
+
+        private void SetupOutputFile()
+        {
+            if (!Application.isEditor)
+                return;
+
+            Directory.CreateDirectory(Application.streamingAssetsPath + outputDirectory);
+
+            int version = 0;
+            string filePath = Application.streamingAssetsPath + outputDirectory + outputFileName + "-"
+                + version + ".csv";
+            while (File.Exists(filePath))
+            {
+                version++;
+                filePath = Application.streamingAssetsPath + outputDirectory + outputFileName + "-"
+                    + version + ".csv";
+            }
+
+            File.WriteAllText(filePath, "Episode,Total Reward");
+            outputStream = new(filePath);
         }
 
         [System.Serializable]
@@ -152,6 +228,14 @@ namespace Ball3D
             [Header("Noise Rate")]
             public TMP_Text epsilonText;
             public Slider epsilonSlider;
+
+            [Header("Time Scale")]
+            public TMP_Text timeScaleText;
+            public Slider timeScaleSlider;
+
+            [Header("Other UI")]
+            public TMP_Text stepsText;
+            public TMP_Text episodesText;
         }
     }
 

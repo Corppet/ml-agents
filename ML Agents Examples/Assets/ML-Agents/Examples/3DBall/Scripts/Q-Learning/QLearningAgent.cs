@@ -63,6 +63,8 @@ namespace Ball3D
 
         private void NewEpisode()
         {
+            QLearningManager.Instance.CompleteEpisode(totalReward);
+
             // start at a random state
             ballRb.position = new Vector3(Random.Range(-2.25f, 2.25f) + transform.position.x,
                 ballStartHeight + transform.position.y,
@@ -71,9 +73,7 @@ namespace Ball3D
             ballRb.angularVelocity = Vector3.zero;
             transform.rotation = Quaternion.identity;
 
-            // update Q-Learning stats
             totalReward = 0f;
-            QLearningManager.Instance.Episodes++;
         }
 
         private void PerformAction(Action action)

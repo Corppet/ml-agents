@@ -20,6 +20,8 @@ namespace Ball3D
             }
         }
         private float totalReward;
+        private State prevState;
+        private Action prevAction;
 
         private void Awake()
         {
@@ -37,10 +39,6 @@ namespace Ball3D
             Action action = QLearningManager.Instance.GetAction(state);
             PerformAction(action);
 
-            // get the agent's next state
-            State nextState = new(new Vector2(ballRb.position.x, ballRb.position.z),
-                               new Vector2(transform.rotation.x, transform.rotation.z));
-
             // get the reward
             float reward = .1f;
             if (isTerminal)
@@ -54,11 +52,12 @@ namespace Ball3D
             }
 
             // update the Q-value
-            QLearningManager.Instance.UpdateQValue(state, action, reward, nextState);
+            QLearningManager.Instance.UpdateQValue(prevState, prevAction, reward, state);
 
             // update Q-Learning stats
             QLearningManager.Instance.Steps++;
-
+            prevState = state;
+            prevAction = action;
         }
 
         private void NewEpisode()

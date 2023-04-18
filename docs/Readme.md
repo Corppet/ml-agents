@@ -1,3 +1,7 @@
+# Game AI ML-Agents
+
+This branch is specifically for some machine learning assignments in the COGS-4420 Game AI course at Rensselaer Polytechnic Institute. More information can be found in the assignment's [README file](https://github.com/Corppet/ml-agents/blob/game-ai-hw5/ML%20Agents%20Examples/Assets/ML-Agents/Examples/3DBall/3DBall%20-%20README.txt).
+
 # Unity ML-Agents Toolkit
 
 [![docs badge](https://img.shields.io/badge/docs-reference-blue.svg)](https://github.com/Unity-Technologies/ml-agents/tree/release_20_docs/docs/)
